@@ -73,7 +73,7 @@ public class Charsets {
     , '.'
     , ' ' };
 
-  static char[] getCharset(Charset ch) {
+  static char[] getChars(Charset ch) {
     switch (ch)
     {
     case DETAIL:

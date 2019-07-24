@@ -1,9 +1,6 @@
 package net.lanesurface.letterhead;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Image;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 
@@ -20,11 +17,11 @@ public class ImageConverter {
       this.color = color;
     }
 
-    public char getChar() {
+    char getChar() {
       return chr;
     }
 
-    public Color getColor() {
+    Color getColor() {
       return color;
     }
   }
@@ -47,7 +44,19 @@ public class ImageConverter {
     }
 
     void renderFrame(Graphics graphics) {
-      
+      ColoredChar cc;
+
+      for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+          cc = frm[x][y];
+
+          graphics.setColor(cc.getColor());
+          graphics.drawString(
+            cc.getChar()+"",
+            x*fw,
+            y*fh);
+        }
+      }
     }
 
     public RenderedImage createImage() {
@@ -55,6 +64,7 @@ public class ImageConverter {
 
       BufferedImage image;
       Graphics igr;
+      FontMetrics fntm;
 
       fw = fh = 0; // TODO: Initialize these values.
       image = new BufferedImage(
@@ -62,6 +72,8 @@ public class ImageConverter {
         height*fh,
         BufferedImage.TYPE_INT_RGB);
       igr = image.createGraphics();
+      fntm = igr.getFontMetrics();
+
       renderFrame(igr);
       igr.dispose();
 
@@ -130,6 +142,12 @@ public class ImageConverter {
 
     width = frame.width;
     height = frame.height;
+    /*
+     * The source image needs to be resized to the same dimensions that we
+     * are going to use for the AsciiFrame. (i.e. There should be one pixel per
+     * character that we generate.) This delegates most of the averaging of
+     * pixel values to Java2D itself.
+     */
     image = image.getScaledInstance(
       width,
       height,
@@ -146,7 +164,7 @@ public class ImageConverter {
       null);
     graphics.dispose();
 
-    chars = Charsets.getCharset(charset);
+    chars = Charsets.getChars(charset);
     range = 255.d / chars.length;
     for (int y = 0; y < frame.height; y++) {
       for (int x = 0; x < frame.width; x++) {
