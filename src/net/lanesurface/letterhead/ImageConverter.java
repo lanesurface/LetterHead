@@ -121,6 +121,7 @@ class ImageConverter {
     int width,
     int height)
   {
+    charset = Charset.DETAIL; // Default for now.
     AsciiFrame frame = new AsciiFrame(
       width,
       height);

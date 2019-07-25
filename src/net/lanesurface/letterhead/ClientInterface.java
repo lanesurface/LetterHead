@@ -192,9 +192,23 @@ public class ClientInterface {
     File dest;
 
     converter = new ImageConverter();
-    dest = null; // TODO: Get destination from client.
+    dest = new File("out.png"); // TODO: Get destination from client.
     iw = getValue(wf);
     ih = getValue(hf);
+
+    Graphics g;
+    FontMetrics fm;
+    int fw, fh;
+    g = window.getGraphics();
+    g.setFont(new Font(
+      "Consolas",
+      Font.BOLD,
+      12));
+    fm = g.getFontMetrics();
+    fw = fm.getMaxAdvance();
+    fh = fm.getAscent()
+      + fm.getDescent()
+      + fm.getLeading();
 
     try {
       frame = converter.createFrame(
@@ -202,8 +216,8 @@ public class ClientInterface {
         iw,
         ih);
       img = frame.createImage(
-        0,
-        0);
+        fw,
+        fh);
 
       ImageIO.write(
         img,
