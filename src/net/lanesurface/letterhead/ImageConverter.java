@@ -4,7 +4,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 
-public class ImageConverter {
+class ImageConverter {
   private static class ColoredChar {
     private char chr;
     private Color color;
@@ -26,7 +26,7 @@ public class ImageConverter {
     }
   }
 
-  private class AsciiFrame {
+  class AsciiFrame {
     private int width,
       height,
       fw,
@@ -44,8 +44,9 @@ public class ImageConverter {
     }
 
     void renderFrame(Graphics graphics) {
-      ColoredChar cc;
+      if (!ready) return;
 
+      ColoredChar cc;
       for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
           cc = frm[x][y];
@@ -59,20 +60,25 @@ public class ImageConverter {
       }
     }
 
-    public RenderedImage createImage() {
-      if (!ready) return null;
-
+    /*
+     * `fm` and `fh` must be predetermined by the caller, as we need to know
+     * the metrics of the font before we can create an appropriately sized
+     * image.
+     */
+    RenderedImage createImage(
+      int fw,
+      int fh)
+    {
       BufferedImage image;
       Graphics igr;
-      FontMetrics fntm;
 
-      fw = fh = 0; // TODO: Initialize these values.
+      this.fw = fw;
+      this.fh = fh;
       image = new BufferedImage(
         width*fw,
         height*fh,
         BufferedImage.TYPE_INT_RGB);
       igr = image.createGraphics();
-      fntm = igr.getFontMetrics();
 
       renderFrame(igr);
       igr.dispose();
@@ -110,7 +116,7 @@ public class ImageConverter {
     this.charset = charset;
   }
 
-  public AsciiFrame createFrame(
+  AsciiFrame createFrame(
     Image image,
     int width,
     int height)

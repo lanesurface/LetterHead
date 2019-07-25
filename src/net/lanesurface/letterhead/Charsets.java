@@ -73,11 +73,24 @@ public class Charsets {
     , '.'
     , ' ' };
 
+  private static char[] ASCII_SIMPLE =
+    { '@'
+    , '%'
+    , '#'
+    , '*'
+    , '+'
+    , '='
+    , '-'
+    , ':'
+    , '.'
+    , ' ' };
+
   static char[] getChars(Charset ch) {
     switch (ch)
     {
-    case DETAIL:
     case SIMPLE:
+      return ASCII_SIMPLE;
+    case DETAIL:
     case BRAILLE:
     default:
       return ASCII_DETAIL;
