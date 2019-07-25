@@ -5,18 +5,73 @@ import com.sun.prism.Image;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GraphicsEnvironment;
-import java.awt.image.BufferedImage;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
 public class ClientInterface {
+  private static class NumericVerifier extends InputVerifier {
+    /*
+     * Ensure that the text entered into a JTextField contains only numeric
+     * values, so that we can set the width and height of the output image
+     * appropriately.
+     */
+    @Override
+    public boolean verify(JComponent component) {
+      JTextField field;
+      String text;
+
+      field = (JTextField)component;
+      text = field.getText();
+
+      return text.matches("[0-9]+");
+    }
+  }
+
+  private class OpenHandler implements ActionListener {
+    JFileChooser fc;
+    int r;
+
+    {
+      fc = new JFileChooser();
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      r = fc.showOpenDialog(window);
+      inf = fc.getSelectedFile();
+      ff.setText(inf.getName());
+    }
+  }
+
+  private class SaveHandler implements ActionListener {
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      if (inf == null) { // The file has not yet been specified.
+        JOptionPane.showMessageDialog(
+          window,
+          "You must specify a file to convert!",
+          "Invalid file name",
+          JOptionPane.ERROR_MESSAGE);
+
+        return;
+      }
+      createImage(inf);
+    }
+  }
+
   private JFrame window;
+  private JTextField ff,
+    wf,
+    hf;
+  private InputVerifier sv;
+  private ActionListener oh, sh;
+  private File inf;
   private int width,
     height,
     iw,
@@ -42,30 +97,22 @@ public class ClientInterface {
 
     JPanel inputPanel;
     JLabel fileLabel;
-    JTextField fileField;
     JButton fileButton;
 
     inputPanel = new JPanel();
     fileLabel = new JLabel("File:");
-    fileField = new JTextField(25);
+    ff = new JTextField(25);
 
     inputPanel.add(
       fileLabel,
       BorderLayout.PAGE_START);
     inputPanel.add(
-      fileField,
+      ff,
       BorderLayout.CENTER);
 
     fileButton = new JButton("Open");
-    fileButton.addActionListener(e -> {
-      JFileChooser chooser;
-      int r;
-      chooser = new JFileChooser();
-      r = chooser.showOpenDialog(window);
-
-      if (r == JFileChooser.APPROVE_OPTION)
-        createImage(chooser.getSelectedFile());
-    });
+    oh = new OpenHandler();
+    fileButton.addActionListener(oh);
     inputPanel.add(
       fileButton,
       BorderLayout.PAGE_END);
@@ -75,11 +122,45 @@ public class ClientInterface {
     JComboBox box = new JComboBox<String>(fonts);
     panel.add(box);
 
+    JPanel sp;
+    JLabel xl;
+
+    sp = new JPanel(new FlowLayout());
+    xl = new JLabel("X");
+    wf = new JTextField(
+      "64",
+      3);
+    hf = new JTextField(
+      "64",
+      3);
+    sv = new NumericVerifier();
+
+    wf.setInputVerifier(sv);
+    hf.setInputVerifier(sv);
+    sp.add(wf);
+    sp.add(xl);
+    sp.add(hf);
+    panel.add(sp);
+
+    JPanel sbp;
+    JButton sb;
+
+    sbp = new JPanel();
+    sb = new JButton("Save");
+    sh = new SaveHandler();
+
+    sb.addActionListener(sh);
+    sbp.add(
+      sb,
+      BorderLayout.PAGE_END);
+    panel.add(sbp);
+
     window.pack();
     window.setVisible(true);
   }
 
   private boolean isMonospace(Font font) {
+    // TODO: Only display monospace font options.
     return true;
   }
 
@@ -100,6 +181,10 @@ public class ClientInterface {
       String[].class);
   }
 
+  private int getValue(JTextField field) {
+    return Integer.parseInt(field.getText());
+  }
+
   private void createImage(File file) {
     ImageConverter converter;
     ImageConverter.AsciiFrame frame;
@@ -108,6 +193,8 @@ public class ClientInterface {
 
     converter = new ImageConverter();
     dest = null; // TODO: Get destination from client.
+    iw = getValue(wf);
+    ih = getValue(hf);
 
     try {
       frame = converter.createFrame(
