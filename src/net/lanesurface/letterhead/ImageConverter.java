@@ -40,7 +40,7 @@ class ImageConverter {
     {
       this.width = width;
       this.height = height;
-      frm = new ColoredChar[width][height];
+      frm = new ColoredChar[height][width];
     }
 
     void renderFrame(Graphics graphics) {
@@ -49,7 +49,7 @@ class ImageConverter {
       ColoredChar cc;
       for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
-          cc = frm[x][y];
+          cc = frm[y][x];
 
           graphics.setColor(cc.getColor());
           graphics.drawString(
@@ -92,9 +92,20 @@ class ImageConverter {
       int x,
       int y)
     {
-      frm[x][y] = new ColoredChar(
+      frm[y][x] = new ColoredChar(
         chr,
         color);
+    }
+
+    char[][] getChars() {
+      char chrs[][];
+
+      chrs = new char[width][height];
+      for (int y = 0; y < height; y++)
+        for (int x = 0; x < width; x++)
+          chrs[y][x] = frm[y][x].getChar();
+
+      return chrs;
     }
 
     /*

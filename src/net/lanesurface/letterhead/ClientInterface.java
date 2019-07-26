@@ -1,10 +1,9 @@
 package net.lanesurface.letterhead;
 
-import com.sun.prism.Image;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -38,6 +37,29 @@ public class ClientInterface {
 
     {
       fc = new JFileChooser();
+      fc.addChoosableFileFilter(new FileFilter() {
+        String options[] =
+          { "jpg"
+          , "png"
+          , "gif" };
+
+        @Override
+        public boolean accept(File f) {
+          String name;
+
+          name = f.getName();
+          for (String option : options)
+            if (name.endsWith(option))
+              return true;
+
+          return false;
+        }
+
+        @Override
+        public String getDescription() {
+          return "JPG, PNG, & GIF";
+        }
+      });
     }
 
     @Override
@@ -49,7 +71,6 @@ public class ClientInterface {
   }
 
   private class SaveHandler implements ActionListener {
-
     @Override
     public void actionPerformed(ActionEvent e) {
       if (inf == null) { // The file has not yet been specified.
@@ -61,6 +82,7 @@ public class ClientInterface {
 
         return;
       }
+
       createImage(inf);
     }
   }
@@ -69,6 +91,7 @@ public class ClientInterface {
   private JTextField ff,
     wf,
     hf;
+  private JTextArea ta;
   private InputVerifier sv;
   private ActionListener oh, sh;
   private File inf;
@@ -124,6 +147,7 @@ public class ClientInterface {
 
     JPanel sp;
     JLabel xl;
+    JButton rb;
 
     sp = new JPanel(new FlowLayout());
     xl = new JLabel("X");
@@ -134,13 +158,26 @@ public class ClientInterface {
       "64",
       3);
     sv = new NumericVerifier();
+    rb = new JButton("Render");
 
     wf.setInputVerifier(sv);
     hf.setInputVerifier(sv);
     sp.add(wf);
     sp.add(xl);
     sp.add(hf);
+    sp.add(rb);
     panel.add(sp);
+
+    JScrollPane tsp;
+    ta = new JTextArea(
+      25,
+      50);
+    ta.setFont(new Font(
+      Font.MONOSPACED,
+      Font.BOLD,
+      12));
+    tsp = new JScrollPane(ta);
+    panel.add(tsp);
 
     JPanel sbp;
     JButton sb;
@@ -185,6 +222,17 @@ public class ClientInterface {
     return Integer.parseInt(field.getText());
   }
 
+  private void displayText(ImageConverter.AsciiFrame frame) {
+    char chrs[][];
+    chrs = frame.getChars();
+
+    ta.setText("");
+    for (int y = 0; y < chrs.length; y++)
+      ta.setText(ta.getText()
+                 + new String(chrs[y])
+                 + "\n");
+  }
+
   private void createImage(File file) {
     ImageConverter converter;
     ImageConverter.AsciiFrame frame;
@@ -224,6 +272,8 @@ public class ClientInterface {
         "png",
         dest);
     } catch (IOException ie) { return; }
+
+    displayText(frame);
   }
 
   public static void main(String[] args) {
